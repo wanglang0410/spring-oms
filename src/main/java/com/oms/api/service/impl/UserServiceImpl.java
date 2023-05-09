@@ -1,6 +1,5 @@
 package com.oms.api.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.oms.api.entity.User;
 import com.oms.api.mapper.UserMapper;

@@ -20,8 +20,8 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
-    @GetMapping("/info/{id}")
-    public List<Map<String, Object>> user(@PathVariable Integer id) {
+    @GetMapping("/info")
+    public List<Map<String, Object>> user() {
         User user = new User();
         user.setUsername("admin");
         return userService.findUserByFirstName(user);

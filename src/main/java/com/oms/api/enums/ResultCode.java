@@ -8,8 +8,8 @@ public enum ResultCode {
     PARAM_IS_BLANK(1002, "参数为空"),
     PARAM_TYPE_BIND_ERROR(1003, "参数类型错误"),
     PARAM_NOT_COMPLETE(1004, "参数缺失"),
-    /* 用户错误 2001-2999*/
-    USER_NOTLOGGED_IN(401, "用户未登录"),
+    USER_NOT_LOGGED_IN(401, "用户未登录"),
+    USER_NOT_FORBIDDEN(403, "用户权限不足"),
     USER_LOGIN_ERROR(404, "账号不存在或密码错误"),
     SYSTEM_ERROR(10000, "系统异常，请稍后重试");
 
