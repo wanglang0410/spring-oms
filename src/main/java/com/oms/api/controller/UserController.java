@@ -2,6 +2,7 @@ package com.oms.api.controller;
 
 import com.oms.api.common.annotation.ResponseResult;
 import com.oms.api.entity.User;
+import com.oms.api.exception.BizException;
 import com.oms.api.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,9 @@ public class UserController {
 
     @PostMapping("/edit")
     boolean edit(@RequestBody User user) {
-        userService.updateUserById(user);
+        if (!(userService.updateUserById(user) > 0)) {
+            throw new BizException("更新失败");
+        }
         return true;
     }
 }

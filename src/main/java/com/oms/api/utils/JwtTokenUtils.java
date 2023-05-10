@@ -1,12 +1,16 @@
 package com.oms.api.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.oms.api.config.JwtConfig;
+import com.oms.api.entity.LoginUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,8 +25,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class JwtTokenUtils implements InitializingBean {
-
-    private final JwtConfig jwtConfig;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private JwtConfig jwtConfig;
     private static final String AUTHORITIES_KEY = "auth";
     private Key key;
 
@@ -55,14 +61,12 @@ public class JwtTokenUtils implements InitializingBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-
         HashMap map = (HashMap) claims.get("auth");
-
-        User principal = new User(map.get("user").toString(), map.get("password").toString(), authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        String userId = map.get("userId").toString();
+        String loginUserJson = redisTemplate.boundValueOps("login_user:" + userId).get();
+        LoginUser loginUser = JSON.parseObject(loginUserJson, LoginUser.class);
+        return new UsernamePasswordAuthenticationToken(loginUser, token, authorities);
     }
 
     public boolean validateToken(String authToken) {

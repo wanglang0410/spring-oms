@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,11 +30,14 @@ public class WebSecurityConfig {
     @Autowired
     private LoginAuthenticationFailureHandler authenticationFailureHandler;
 
+    @Autowired
+    private  JwtTokenUtils jwtTokenUtils;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 //禁用表单登录，前后端分离用不上
-                .formLogin().disable()
+                .formLogin().failureHandler(authenticationFailureHandler).disable()
                 // 禁用 CSRF
                 .csrf().disable()
                 // 授权异常
@@ -58,7 +60,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 //允许匿名及登录用户访问
-                .requestMatchers("/login", "/error/**", "/user/**").permitAll()
+                .requestMatchers("/login", "/error/**").permitAll()
                 // 所有请求都需要认证
                 .anyRequest().authenticated();
 
@@ -66,15 +68,20 @@ public class WebSecurityConfig {
         httpSecurity.headers().cacheControl();
 
         // 添加JWT filter
-        httpSecurity.apply(new TokenConfigurer());
+        httpSecurity.apply(new TokenConfigurer(jwtTokenUtils));
         return httpSecurity.build();
     }
 
     public class TokenConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
+        private JwtTokenUtils jwtTokenUtils;
+        public TokenConfigurer(JwtTokenUtils jwtTokenUtils) {
+            this.jwtTokenUtils = jwtTokenUtils;
+        }
+
         @Override
         public void configure(HttpSecurity http) {
-            JwtAuthenticationTokenFilter customFilter = new JwtAuthenticationTokenFilter();
+            JwtAuthenticationTokenFilter customFilter = new JwtAuthenticationTokenFilter(jwtTokenUtils);
             http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
         }
     }
