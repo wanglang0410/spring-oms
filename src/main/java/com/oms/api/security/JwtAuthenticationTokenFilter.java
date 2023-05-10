@@ -24,27 +24,17 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenUtils jwtTokenUtils;
 
-    public JwtAuthenticationTokenFilter(JwtTokenUtils jwtTokenUtils) {
-        this.jwtTokenUtils = jwtTokenUtils;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         JwtConfig jwtConfig = SpringContextHolder.getBean(JwtConfig.class);
-        String requestRri = httpServletRequest.getRequestURI();
-        //获取request token
         String token = null;
         String bearerToken = httpServletRequest.getHeader(jwtConfig.getHeader());
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(jwtConfig.getTokenStartWith())) {
             token = bearerToken.substring(jwtConfig.getTokenStartWith().length());
         }
-
         if (StringUtils.hasText(token) && jwtTokenUtils.validateToken(token)) {
             Authentication authentication = jwtTokenUtils.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("set Authentication to security context for '{}', uri: {}", authentication.getName(), requestRri);
-        } else {
-            log.debug("no valid JWT token found, uri: {}", requestRri);
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }

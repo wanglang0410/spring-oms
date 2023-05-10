@@ -12,8 +12,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
@@ -22,7 +23,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     public ErrorResult bizExceptionHandler(BizException e, HttpServletRequest request) {
-        log.error("发生业务异常！原因是: {}", e.getMessage());
         return ErrorResult.fail(e.getCode(), e.getMessage());
     }
 
@@ -38,14 +38,12 @@ public class GlobalExceptionHandler {
     // 参数校验异常
     @ExceptionHandler(BindException.class)
     public ErrorResult handleBindException(BindException e, HttpServletRequest request) {
-        log.error("发生参数校验异常！原因是：", e);
         ErrorResult error = ErrorResult.fail(ResultCode.PARAM_IS_INVALID, e, e.getAllErrors().get(0).getDefaultMessage());
         return error;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResult handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
-        log.error("发生参数校验异常！原因是：", e);
         ErrorResult error = ErrorResult.fail(ResultCode.PARAM_IS_INVALID, e, e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
         return error;
     }
@@ -54,6 +52,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ErrorResult handleAuthenticationException(AuthenticationException e, HttpServletRequest request) {
         ErrorResult error = ErrorResult.fail(ResultCode.USER_NOT_LOGGED_IN, e, e.getMessage());
+        return error;
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    public ErrorResult handleException(Exception e) {
+        ErrorResult error = ErrorResult.fail(ResultCode.SYSTEM_ERROR, e, e.getMessage());
         return error;
     }
 }
