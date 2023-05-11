@@ -6,6 +6,7 @@ import com.oms.api.exception.BizException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -56,7 +57,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ErrorResult handleException(Exception e) {
+    public ErrorResult handleException(Exception e) throws Exception {
+        //抛出AccessDeniedException异常
+        if (e instanceof AccessDeniedException) {
+            throw e;
+        }
         ErrorResult error = ErrorResult.fail(ResultCode.SYSTEM_ERROR, e, e.getMessage());
         return error;
     }

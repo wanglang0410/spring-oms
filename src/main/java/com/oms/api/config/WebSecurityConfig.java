@@ -42,8 +42,8 @@ public class WebSecurityConfig {
                 .csrf().disable()
                 // 授权异常
                 .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
 
                 // 防止iframe 造成跨域
                 .and().headers().frameOptions().disable()

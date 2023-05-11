@@ -6,6 +6,7 @@ import com.oms.api.exception.BizException;
 import com.oms.api.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class UserController {
     private UserServiceImpl userService;
 
     @GetMapping("/info")
+    @PreAuthorize("hasAuthority('/customer1')")
     public List<Map<String, Object>> user() {
         User user = new User();
         user.setUsername("admin");

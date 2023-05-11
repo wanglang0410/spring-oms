@@ -61,12 +61,11 @@ public class JwtTokenUtils implements InitializingBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-        HashMap map = (HashMap) claims.get("auth");
+        HashMap map = (HashMap) claims.get(AUTHORITIES_KEY);
         String userId = map.get("userId").toString();
         String loginUserJson = redisTemplate.boundValueOps("login_user:" + userId).get();
         LoginUser loginUser = JSON.parseObject(loginUserJson, LoginUser.class);
-        return new UsernamePasswordAuthenticationToken(loginUser, token, authorities);
+        return new UsernamePasswordAuthenticationToken(loginUser, token, loginUser.getAuthorities());
     }
 
     public boolean validateToken(String authToken) {
@@ -75,16 +74,12 @@ public class JwtTokenUtils implements InitializingBean {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT signature.");
-            e.printStackTrace();
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token.");
-            e.printStackTrace();
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT token.");
-            e.printStackTrace();
         } catch (IllegalArgumentException e) {
             log.info("JWT token compact of handler are invalid.");
-            e.printStackTrace();
         }
         return false;
     }

@@ -37,9 +37,9 @@ public class UserLoginImpl {
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         String userId = loginUser.getUser().getId().toString();
         redisTemplate.boundValueOps("login_user:" + userId).set(JSON.toJSONString(loginUser));
-        Map<String, String> result = new HashMap<>();
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
+        Map<String, String> result = new HashMap<>();
         result.put("token", jwtTokenUtils.createToken(claims));
         return result;
     }

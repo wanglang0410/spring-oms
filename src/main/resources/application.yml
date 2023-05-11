@@ -14,6 +14,8 @@ server:
 mybatis-plus:
   mapper-locations: com.oms.api.mapper/*.xml
   type-aliases-package: com.oms.api.mapper
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 #jwt
 jwt:
   header: Authorization
@@ -22,4 +24,4 @@ jwt:
   # 使用Base64对该令牌进行编码
   base64-secret: d29zaGl5aWdlc2h1YWlnZW5pemhlbmRlemhpZGFvbWVnb29keWVzbm9pdGhpbmt0aGlzaXNAQEAmJiYmISEhISEhIQ==
   # 令牌过期时间 此处单位/毫秒
-  token-validity-in-seconds: 14400000
+  token-validity-in-seconds: 86400000
