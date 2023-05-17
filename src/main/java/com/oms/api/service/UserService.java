@@ -1,5 +1,6 @@
 package com.oms.api.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.oms.api.entity.User;
 
 import java.util.List;
@@ -52,4 +53,8 @@ public interface UserService {
      * @return
      */
     List<Map<String, Object>> findUserByFirstName(User firstName);
+
+    Map<String, Object> getList(User user);
+
+    IPage getPageList(User user);
 }

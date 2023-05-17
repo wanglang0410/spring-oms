@@ -38,6 +38,7 @@ public class WebSecurityConfig {
         httpSecurity
                 //禁用表单登录，前后端分离用不上
                 .formLogin().failureHandler(authenticationFailureHandler).disable()
+                .logout().disable()
                 // 禁用 CSRF
                 .csrf().disable()
                 // 授权异常

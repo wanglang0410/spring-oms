@@ -3,6 +3,7 @@ package com.oms.api.controller;
 import com.oms.api.common.annotation.ResponseResult;
 import com.oms.api.entity.request.LoginRequest;
 import com.oms.api.service.impl.UserLoginImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindException;
@@ -28,5 +29,10 @@ public class LoginController {
             throw new BindException(result);
         }
         return loginService.login(loginRequest);
+    }
+
+    @PostMapping("/logout")
+    public boolean logout(HttpServletRequest request) {
+        return loginService.logout(request);
     }
 }

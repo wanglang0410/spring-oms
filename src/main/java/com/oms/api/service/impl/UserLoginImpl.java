@@ -6,6 +6,7 @@ import com.oms.api.entity.request.LoginRequest;
 import com.oms.api.exception.BizException;
 import com.oms.api.utils.JwtTokenUtils;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +28,7 @@ public class UserLoginImpl {
     private JwtTokenUtils jwtTokenUtils;
 
     @Autowired
-    private RedisTemplate<String , String> redisTemplate ;
+    private RedisTemplate<String, String> redisTemplate;
 
     public Map<String, String> login(LoginRequest loginRequest) {
         // 创建Authentication对象
@@ -42,5 +43,12 @@ public class UserLoginImpl {
         Map<String, String> result = new HashMap<>();
         result.put("token", jwtTokenUtils.createToken(claims));
         return result;
+    }
+
+    public boolean logout(HttpServletRequest request) {
+        String token = jwtTokenUtils.getTokenFromRequest(request);
+        String userId = jwtTokenUtils.getClaims(token).get("userId").toString();
+        redisTemplate.delete("login_user:" + userId);
+        return true;
     }
 }

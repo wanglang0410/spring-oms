@@ -4,6 +4,7 @@ import com.oms.api.enums.ResultCode;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 public class Response implements Serializable {
@@ -49,6 +50,14 @@ public class Response implements Serializable {
         Response result = new Response();
         result.setCode(code);
         result.setMessage(message);
+        return result;
+    }
+
+    public static Response fail(Integer code, String message, Map<String, Object> data) {
+        Response result = new Response();
+        result.setCode(code);
+        result.setMessage(message);
+        result.setData(data);
         return result;
     }
 

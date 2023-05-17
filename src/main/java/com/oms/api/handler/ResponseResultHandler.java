@@ -1,5 +1,6 @@
 package com.oms.api.handler;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.oms.api.common.annotation.ResponseResult;
 import com.oms.api.entity.ErrorResult;
 import com.oms.api.entity.Response;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
@@ -33,14 +37,23 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
 
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-       response.setStatusCode(HttpStatus.OK);
+        response.setStatusCode(HttpStatus.OK);
         if (body instanceof ErrorResult) {
             ErrorResult error = (ErrorResult) body;
-            return Response.fail(error.getCode(), error.getMessage());
+            return Response.fail(error.getCode(), error.getMessage(), error.getData());
         } else if (body instanceof Response) {
             return body;
         } else if (body instanceof String) {
             return body;
+        } else if (body instanceof IPage<?>) {
+            IPage<?> bodyPage = (IPage<?>) body;
+            Map<String, Object> result = new HashMap<>();
+            result.put("list", bodyPage.getRecords());
+            result.put("totalSize", bodyPage.getTotal());
+            result.put("totalPage", bodyPage.getPages());
+            result.put("size", bodyPage.getSize());
+            result.put("page", bodyPage.getCurrent());
+            return Response.success(result);
         }
         return Response.success(body);
     }

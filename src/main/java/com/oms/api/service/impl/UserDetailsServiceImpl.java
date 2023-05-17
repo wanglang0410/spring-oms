@@ -6,6 +6,7 @@ import com.oms.api.entity.LoginUser;
 import com.oms.api.entity.User;
 import com.oms.api.mapper.MenuMapper;
 import com.oms.api.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,8 +14,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private UserMapper userMapper;
@@ -35,8 +39,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         //获取该用户权限
-        List<String> permissions = menuMapper.findUserMenuById(user.getId());
-
+        List<String> originPermissions = menuMapper.findUserMenuById(user.getId());
+        List<String> permissions = originPermissions.stream().filter(Objects::nonNull).collect(Collectors.toList());
         // 将查询到的对象转换成Spring Security所需要的UserDetails对象
         return new LoginUser(user, permissions);
     }

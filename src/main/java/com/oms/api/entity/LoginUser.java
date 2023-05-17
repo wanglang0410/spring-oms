@@ -21,10 +21,10 @@ public class LoginUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> collect = permissions
-                .stream()
-                .map(permission -> new SimpleGrantedAuthority(permission))
-                .collect(Collectors.toList());
+        if (permissions == null || permissions.isEmpty()) {
+            return null;
+        }
+        List<SimpleGrantedAuthority> collect = permissions.stream().map(permission -> new SimpleGrantedAuthority(permission)).collect(Collectors.toList());
         return collect;
     }
 

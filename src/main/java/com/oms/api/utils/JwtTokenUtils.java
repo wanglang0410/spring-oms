@@ -6,21 +6,18 @@ import com.oms.api.entity.LoginUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -32,20 +29,15 @@ public class JwtTokenUtils implements InitializingBean {
     private static final String AUTHORITIES_KEY = "auth";
     private Key key;
 
-    public JwtTokenUtils(JwtConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-    }
-
     @Override
     public void afterPropertiesSet() {
-
         byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.getBase64Secret());
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
 
     public String createToken(Map<String, Object> claims) {
-        return Jwts.builder().claim(AUTHORITIES_KEY, claims).setId(UUID.randomUUID().toString()).setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + jwtConfig.getTokenValidityInSeconds())).compressWith(CompressionCodecs.DEFLATE).signWith(key, SignatureAlgorithm.HS512).compact();
+        return Jwts.builder().addClaims(claims).setId(UUID.randomUUID().toString()).setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + jwtConfig.getTokenValidityInSeconds())).compressWith(CompressionCodecs.DEFLATE).signWith(key, SignatureAlgorithm.HS512).compact();
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -61,11 +53,13 @@ public class JwtTokenUtils implements InitializingBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-        HashMap map = (HashMap) claims.get(AUTHORITIES_KEY);
-        String userId = map.get("userId").toString();
+        String userId = claims.get("userId").toString();
         String loginUserJson = redisTemplate.boundValueOps("login_user:" + userId).get();
-        LoginUser loginUser = JSON.parseObject(loginUserJson, LoginUser.class);
-        return new UsernamePasswordAuthenticationToken(loginUser, token, loginUser.getAuthorities());
+        if (StringUtils.hasLength(loginUserJson)) {
+            LoginUser loginUser = JSON.parseObject(loginUserJson, LoginUser.class);
+            return new UsernamePasswordAuthenticationToken(loginUser, token, loginUser.getAuthorities());
+        }
+        return null;
     }
 
     public boolean validateToken(String authToken) {
@@ -92,6 +86,26 @@ public class JwtTokenUtils implements InitializingBean {
             claims = null;
         }
         return claims;
+    }
+
+    public Map<String, Object> getClaims(String token) {
+        return getClaimsFromToken(token);
+    }
+
+
+    /**
+     * 从 request 的 header 中获取 JWT
+     *
+     * @param httpServletRequest 请求
+     * @return JWT
+     */
+    public String getTokenFromRequest(HttpServletRequest httpServletRequest) {
+        String token = null;
+        String bearerToken = httpServletRequest.getHeader(jwtConfig.getHeader());
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(jwtConfig.getTokenStartWith())) {
+            token = bearerToken.substring(jwtConfig.getTokenStartWith().length());
+        }
+        return token;
     }
 }
 

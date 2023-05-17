@@ -1,5 +1,6 @@
 package com.oms.api.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.oms.api.common.annotation.ResponseResult;
 import com.oms.api.entity.User;
 import com.oms.api.exception.BizException;
@@ -23,11 +24,19 @@ public class UserController {
     private UserServiceImpl userService;
 
     @GetMapping("/info")
-    @PreAuthorize("hasAuthority('/customer1')")
-    public List<Map<String, Object>> user() {
+    @PreAuthorize("hasAuthority('/customer')")
+    public Map<String, Object> user() {
         User user = new User();
         user.setUsername("admin");
-        return userService.findUserByFirstName(user);
+        return userService.getList(user);
+    }
+
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('/customer')")
+    public IPage list() {
+        User user = new User();
+        user.setUsername("admin");
+        return userService.getPageList(user);
     }
 
     /**
@@ -42,7 +51,7 @@ public class UserController {
     }
 
     @PostMapping("/edit")
-    boolean edit(@RequestBody User user) {
+    boolean edit(@Valid @RequestBody User user) {
         if (!(userService.updateUserById(user) > 0)) {
             throw new BizException("更新失败");
         }
