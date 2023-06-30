@@ -49,10 +49,10 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
             IPage<?> bodyPage = (IPage<?>) body;
             Map<String, Object> result = new HashMap<>();
             result.put("list", bodyPage.getRecords());
-            result.put("totalSize", bodyPage.getTotal());
             result.put("totalPage", bodyPage.getPages());
             result.put("size", bodyPage.getSize());
             result.put("page", bodyPage.getCurrent());
+            result.put("totalSize", bodyPage.getTotal());
             return Response.success(result);
         }
         return Response.success(body);
