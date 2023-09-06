@@ -3,6 +3,7 @@ package com.oms.api.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.oms.api.entity.User;
 import com.oms.api.mapper.UserMapper;
 import com.oms.api.service.UserService;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
     private UserMapper userMapper;

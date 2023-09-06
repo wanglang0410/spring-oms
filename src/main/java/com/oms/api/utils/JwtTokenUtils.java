@@ -37,7 +37,14 @@ public class JwtTokenUtils implements InitializingBean {
 
 
     public String createToken(Map<String, Object> claims) {
-        return Jwts.builder().addClaims(claims).setId(UUID.randomUUID().toString()).setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + jwtConfig.getTokenValidityInSeconds())).compressWith(CompressionCodecs.DEFLATE).signWith(key, SignatureAlgorithm.HS512).compact();
+        return Jwts.builder()
+                .addClaims(claims)
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtConfig.getTokenValidityInSeconds()))
+                .compressWith(CompressionCodecs.DEFLATE)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     public Date getExpirationDateFromToken(String token) {

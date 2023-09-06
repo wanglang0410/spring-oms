@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.oms.api.common.annotation.ResponseResult;
 import com.oms.api.entity.User;
 import com.oms.api.exception.BizException;
-import com.oms.api.service.impl.UserServiceImpl;
+import com.oms.api.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class UserController {
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @GetMapping("/info")
     @PreAuthorize("hasAuthority('/customer')")
